@@ -39,7 +39,7 @@ def kanji_to_furigana():
       message=repr(kanji_list)
    )
 
-   return response
+   return response.text
 
 doc = pymupdf.open("語彙表－大地1  L3.pdf")
 tabs = doc[0].find_tables()
@@ -48,13 +48,19 @@ if tabs.tables:
    tab = tabs[0].to_pandas()
    tab = tab.drop(columns=["課", "Col1", "Col2", "品詞"])
    tab = tab.loc[~(tab == "").all(axis=1)]
-   tab.columns = ["romaji", "hiragana/katakana/furigana", "kanji", "portuguese"]
+   tab.columns = ["romaji", "hiragana-katakana", "kanji", "portuguese"]
 
    kanji_list = tab["kanji"].tolist()
-   furigana_model = kanji_to_furigana()
 
-   #a = pd.DataFrame(furigana.model_dump() for furigana in furigana_model)
-   #print(a)
-   #tab["kanji"] = tab["kanji"].map(furigana_dict)
+   furigana_list = kanji_to_furigana()
+   furigana_list = furigana_list.strip("```\n")
+
+   tab["hiragana-katakana"] = [
+      furigana if furigana != '' else katakana_hiragana 
+      for katakana_hiragana, furigana in zip(tab["hiragana-katakana"], ast.literal_eval(furigana_list))
+   ]
+
+   tab = tab.rename(columns={"hiragana-katakana": "hiragana-katakana-furigana"})
+   tab = tab.drop(columns="kanji")
 
    tab.to_csv("output.csv")
