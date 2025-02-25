@@ -1,11 +1,11 @@
 import pymupdf
 import pandas as pd
-import google.generativeai as genai
+from google import genai
 import os
 import ast
 
 def kanji_to_furigana():
-   genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+   client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
    prompt = """I want you to act as a Japanese language teacher.
                I will send you a list of words written in kanji, and you must
@@ -29,24 +29,17 @@ def kanji_to_furigana():
                - The output must preserve the original structure and order of
                the input, modifying only the kanji that require furigana"""
 
+   chat = client.chats.create(model="gemini-2.0-flash-lite-preview-02-05")
 
-   generation_config = {
-   "temperature": 0.2,
-   "top_p": 0.95,
-   "top_k": 64,
-   "max_output_tokens": 8192,
-   "response_mime_type": "text/plain",
-   }
-
-   model = genai.GenerativeModel(
-   model_name="gemini-2.0-flash-lite-preview-02-05",
-   generation_config=generation_config,
-   system_instruction=prompt,
+   response = chat.send_message(
+      message=prompt
    )
 
-   response = model.start_chat().send_message(repr(kanji_list))
+   response = chat.send_message(
+      message=repr(kanji_list)
+   )
 
-   return eval(response.text)
+   return response
 
 doc = pymupdf.open("語彙表－大地1  L3.pdf")
 tabs = doc[0].find_tables()
@@ -58,8 +51,10 @@ if tabs.tables:
    tab.columns = ["romaji", "hiragana/katakana/furigana", "kanji", "portuguese"]
 
    kanji_list = tab["kanji"].tolist()
-   furigana_dict = kanji_to_furigana()
+   furigana_model = kanji_to_furigana()
 
-   tab["kanji"] = tab["kanji"].map(furigana_dict)
+   #a = pd.DataFrame(furigana.model_dump() for furigana in furigana_model)
+   #print(a)
+   #tab["kanji"] = tab["kanji"].map(furigana_dict)
 
    tab.to_csv("output.csv")
