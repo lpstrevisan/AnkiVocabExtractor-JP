@@ -3,6 +3,8 @@ import pandas as pd
 from google import genai
 import os
 import ast
+import argparse
+from pathlib import Path
 
 def kanji_to_furigana():
    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
@@ -41,7 +43,19 @@ def kanji_to_furigana():
 
    return response.text
 
-doc = pymupdf.open("語彙表－大地1  L3.pdf")
+parser = argparse.ArgumentParser()
+
+parser.add_argument("PDFfilename")
+parser.add_argument("-o", "--OCR", action="store_true")
+   
+args = parser.parse_args()
+
+doc = pymupdf.open(args.PDFfilename)
+
+if args.OCR:
+   print("option not yet implemented")
+   raise SystemExit(1)
+
 tabs = doc[0].find_tables()
 
 if tabs.tables: 
@@ -63,4 +77,4 @@ if tabs.tables:
    tab = tab.rename(columns={"hiragana-katakana": "hiragana-katakana-furigana"})
    tab = tab.drop(columns="kanji")
 
-   tab.to_csv("output.csv")
+   tab.to_csv(str(Path(args.PDFfilename).with_suffix(".csv")))
