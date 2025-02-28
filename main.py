@@ -3,13 +3,8 @@ from pdf_reader import pdf_reader
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("-o", "--OCR", action="store_true")
-parser.add_argument("filename")
+parser.add_argument("PDFfilename")
 
 args = parser.parse_args()
 
-if args.OCR:
-   print("option not yet implemented")
-   raise SystemExit(1)
-else:
-   pdf_reader(args.filename)
+pdf_reader(args.PDFfilename)
