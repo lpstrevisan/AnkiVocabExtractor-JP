@@ -17,7 +17,7 @@ def pdf_reader(PDFfilename):
 
         kanji_list = tab["kanji"].tolist()
 
-        furigana_list = kanji_to_furigana()
+        furigana_list = kanji_to_furigana(kanji_list)
         furigana_list = furigana_list.strip("```\n")
 
         tab["hiragana-katakana"] = [
@@ -28,7 +28,7 @@ def pdf_reader(PDFfilename):
         tab = tab.rename(columns={"hiragana-katakana": "hiragana-katakana-furigana"})
         tab = tab.drop(columns="kanji")
 
-        tab.to_csv(str(Path(args.PDFfilename).with_suffix(".csv")))
+        tab.to_csv(str(Path(PDFfilename).with_suffix(".csv")))
     else:
         print("Not found tables")
         raise SystemExit(1)

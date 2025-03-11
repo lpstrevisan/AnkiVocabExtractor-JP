@@ -1,7 +1,7 @@
 from google import genai
 import os
 
-def kanji_to_furigana():
+def kanji_to_furigana(kanji_list):
    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
    prompt = """I want you to act as a Japanese language teacher.
@@ -12,6 +12,12 @@ def kanji_to_furigana():
                most commonly used hiragana reading in brackets. For example:
                携帯電話 → 携[けい]帯[たい]電[でん]話[わ] (correct)
                携帯電話[けいたいでんわ] (incorrect, do not use full word furigana)
+
+               Output format:
+               - Only return the processed list of words with the correct
+               furigana formatting.
+               - Do not include explanations, introductions, or any additional
+               text.
                
                Important rules:
                - Use the most common reading for each kanji in compound words 
@@ -24,7 +30,9 @@ def kanji_to_furigana():
                ゲーム機 (incorrect, do not ignore the kanji just because the word
                starts with katakana)
                - The output must preserve the original structure and order of
-               the input, modifying only the kanji that require furigana"""
+               the input, modifying only the kanji that require furigana
+               - Do not attempt to transform or adapt the input into valid
+               Python syntax if it does not originally follow Python syntax"""
 
    chat = client.chats.create(model="gemini-2.0-flash-lite-preview-02-05")
 
