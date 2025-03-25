@@ -4,8 +4,8 @@ import ast
 from pathlib import Path
 from kanji_convert import kanji_to_furigana
 
-def pdf_reader(PDFfilename):
-    doc = pymupdf.open(PDFfilename)
+def pdf_reader(pdf_filename):
+    doc = pymupdf.open(pdf_filename)
 
     tabs = doc[0].find_tables()
 
@@ -28,7 +28,7 @@ def pdf_reader(PDFfilename):
         tab = tab.rename(columns={"hiragana-katakana": "hiragana-katakana-furigana"})
         tab = tab.drop(columns="kanji")
 
-        tab.to_csv(str(Path(PDFfilename).with_suffix(".csv")))
+        tab.to_csv(str(Path(pdf_filename).with_suffix(".csv")))
     else:
         print("Not found tables")
         raise SystemExit(1)
